@@ -5,31 +5,38 @@ from duck import automation
 from duck import window
 
 def duck_actions_loop():
-    """O cérebro do pato: decide o que fazer e quando."""
+    """
+    CÉREBRO DO PATO: Loop principal que decide o que o pato vai fazer.
+    Roda em thread separada para não travar a interface gráfica.
+    """
     while True:
-        # MODIFICADO: Espera um tempo menor, para ser mais ativo
-        time.sleep(random.randint(5, 10))
+        # Espera mais tempo para o pato ficar mais andando normalmente
+        time.sleep(random.randint(8, 15))
         
-        action_choice = random.random()
+        # Só toma decisões se não estiver ocupado com outras ações
+        if not (window.is_following_mouse or window.is_idle or window.is_pulling_mouse):
+            action_choice = random.random()
 
-        # MODIFICADO: Aumentamos a chance de caçar o mouse
-        if action_choice < 0.40: # 40% de chance de seguir o mouse
-            print("[DUCK BRAIN] Decidiu caçar o mouse!")
-            window.start_follow_mouse()
-            
-        # MODIFICADO: Diminuímos a chance de ficar parado
-        elif action_choice < 0.55: # 15% de chance de ficar parado
-            # MUDANÇA CONCEITUAL: Não é mais uma "soneca", é um "descanso"
-            print("[DUCK BRAIN] Decidiu descansar um pouco.")
-            window.start_idle(random.randint(2, 4)) # E por menos tempo
-            
-        else: # 45% de chance de fazer uma ação no sistema
-            print("[DUCK BRAIN] Decidiu fazer uma travessura no PC.")
-            automation.do_random_action()
+            # 30% de chance de caçar o mouse (reduzido)
+            if action_choice < 0.30:
+                print("[DUCK BRAIN] Decidiu caçar o mouse!")
+                window.start_follow_mouse()
+                
+            # 20% de chance de ficar parado/descansar
+            elif action_choice < 0.50:
+                print("[DUCK BRAIN] Decidiu descansar um pouco.")
+                window.start_idle(random.randint(3, 5))
+                
+            # 50% de chance de apenas continuar andando
+            else:
+                print("[DUCK BRAIN] Decidiu continuar caminhando.")
+                # Não faz nada, deixa ele andar normalmente
 
-# ... (o resto do main.py continua igual)
+# Cria a thread do cérebro do pato
+# daemon=True faz ela morrer quando o programa principal acaba
 action_thread = threading.Thread(target=duck_actions_loop, daemon=True)
 action_thread.start()
 
+# PONTO DE ENTRADA: Inicia a janela do pato
 if __name__ == "__main__":
-    window.create_window()
+    window.create_window()  # Cria e roda a interface gráfica
