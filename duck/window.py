@@ -92,26 +92,39 @@ def follow_mouse_step():
 def random_walk_step(root):
     """
     MOVIMENTO ALEATÓRIO: Faz o pato andar pela tela de forma randômica.
+    Corrigido para evitar bug de ficar preso nas bordas.
     """
     global pos_x, pos_y, dir_x, dir_y
     
-    # 2% de chance de mudar direção a cada passo
-    if random.random() < 0.02:
-        dir_x = random.choice([-1, 1])      # Esquerda ou direita
-        dir_y = random.choice([-1, 0, 1])   # Cima, meio ou baixo
+    # Pega dimensões da tela
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    
+    # COLISÃO COM BORDAS: Verifica ANTES de mover para evitar ficar preso
+    margin = 50  # Margem de segurança das bordas
+    
+    # Se muito próximo das bordas, força direção para longe da borda
+    if pos_x <= margin:  # Muito perto da borda esquerda
+        dir_x = 1  # Força ir para direita
+    elif pos_x >= screen_width - 128 - margin:  # Muito perto da borda direita
+        dir_x = -1  # Força ir para esquerda
+    elif pos_y <= margin:  # Muito perto da borda superior
+        dir_y = 1  # Força ir para baixo
+    elif pos_y >= screen_height - 128 - margin:  # Muito perto da borda inferior
+        dir_y = -1  # Força ir para cima
+    else:
+        # Longe das bordas: 3% de chance de mudar direção (aumentado de 2%)
+        if random.random() < 0.03:
+            dir_x = random.choice([-1, 1])      # Esquerda ou direita
+            dir_y = random.choice([-1, 0, 1])   # Cima, meio ou baixo
 
     # Move o pato
     pos_x += dir_x * speed
     pos_y += dir_y * speed
 
-    # COLISÃO COM BORDAS: Inverte direção se sair da tela
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    
-    if pos_x <= 0 or pos_x >= screen_width - 128:
-        dir_x *= -1  # Inverte direção horizontal
-    if pos_y <= 0 or pos_y >= screen_height - 128:
-        dir_y *= -1  # Inverte direção vertical
+    # CORREÇÃO FINAL: Garante que nunca saia da tela (safety net)
+    pos_x = max(0, min(pos_x, screen_width - 128))
+    pos_y = max(0, min(pos_y, screen_height - 128))
 
 # =============================================================================
 # CONTROLE DE ESTADOS
