@@ -180,20 +180,40 @@ def move_duck(root, label):
 
     # DECIDE O MOVIMENTO baseado no estado
     if is_pulling_mouse:
-        # Controla duração da animação de puxar
+        # Durante o puxão, o pato "anda para trás" sutilmente
         pull_timer -= 1
+        
+        # Simula o pato sendo "puxado" junto com o mouse
+        backward_speed = 2  # Velocidade reduzida do movimento para trás
+        pos_x_offset = -dir_x * backward_speed  # Movimento na direção oposta
+        pos_y_offset = random.uniform(-0.5, 0.5)  # Pequena variação vertical
+        
+        # Atualiza posição do pato para simular o "esforço" de puxar
+        global pos_x, pos_y
+        pos_x += pos_x_offset
+        pos_y += pos_y_offset
+        
+        # Verifica bordas durante o puxão
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        if pos_x <= 0: pos_x = 0
+        if pos_x >= screen_width - 128: pos_x = screen_width - 128
+        if pos_y <= 0: pos_y = 0
+        if pos_y >= screen_height - 128: pos_y = screen_height - 128
+        
         if pull_timer <= 0:
             stop_pulling_mouse()
     elif is_following_mouse:
         follow_mouse_step()         # Persegue o mouse
     elif not is_idle:
         random_walk_step(root)      # Caminha aleatoriamente
-    # Se is_idle=True, fica parado (sem andar de costas por enquanto)
+    # Se is_idle=True, fica parado
 
     # ESCOLHE O SPRITE baseado no estado e direção
     if is_pulling_mouse:
-        # Anima sprites de puxar (pull1.png, pull2.png)
-        pull_sprite_index = (pull_sprite_index + 1) % len(sprites_pull_right)
+        # Anima sprites de puxar mais devagar para parecer mais esforçado
+        if walk_sprite_index % 2 == 0:  # Atualiza sprite a cada 2 frames
+            pull_sprite_index = (pull_sprite_index + 1) % len(sprites_pull_right)
         if dir_x >= 0:  # Olhando/puxando para direita
             current_sprite = sprites_pull_right[pull_sprite_index]
         else:           # Olhando/puxando para esquerda

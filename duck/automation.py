@@ -27,14 +27,13 @@ def annoy_mouse():
 
 def drag_mouse_with_beak(duck_direction_x):
     """
-    'Puxa' o mouse SUTILMENTE na direção oposta à que o pato está olhando.
-    Movimento bem sutil para não atrapalhar muito o usuário.
-    Executa em thread separada para não travar a animação.
+    'Puxa' o mouse SINCRONIZADO com o movimento do pato.
+    Agora mouse e pato se movem na mesma velocidade.
     
     Args:
         duck_direction_x: 1 se pato olha direita, -1 se olha esquerda
     """
-    import threading
+    from . import window  # Import local para evitar circular
     
     def pull_action():
         print("[DUCK ACTION] Puxando o mouse com o bico!")
@@ -42,14 +41,20 @@ def drag_mouse_with_beak(duck_direction_x):
         # Inverte a direção do pato para simular "puxar para trás"
         pull_direction = -duck_direction_x
         
-        # Puxões MUITO mais sutis e espaçados
-        for step in range(8):  # Menos puxões
-            dx = pull_direction * 5  # Movimento bem menor (era 15)
-            dy = random.randint(-1, 1)  # Variação mínima
-            pyautogui.moveRel(dx, dy, duration=0.1)
-            time.sleep(0.15)  # Mais espaçado entre puxões
+        # Puxões SINCRONIZADOS com movimento do pato
+        for step in range(12):  # 12 puxões em 1.2 segundos
+            # MESMA VELOCIDADE DO PATO: 2 pixels por frame
+            dx = pull_direction * 2  # Igual ao backward_speed do pato
+            dy = random.randint(-1, 1)  # Variação mínima vertical
+            
+            # Move o mouse na mesma velocidade que o pato se move
+            pyautogui.moveRel(dx, dy, duration=0.05)
+            
+            # Pausa sincronizada com frames da animação (100ms por frame)
+            time.sleep(0.05)  # Total: 100ms por puxão
     
     # Executa em thread separada para não travar animação
+    import threading
     pull_thread = threading.Thread(target=pull_action, daemon=True)
     pull_thread.start()
 
