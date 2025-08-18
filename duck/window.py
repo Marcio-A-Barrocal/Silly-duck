@@ -274,7 +274,7 @@ def create_window():
 
     # CARREGAMENTO DE SPRITES DE CAMINHADA
     for i in range(1, 7):  # walk1.png até walk6.png
-        img_path = os.path.join("images", f"walk{i}.png")
+        img_path = os.path.join("assets","images", f"walk{i}.png")
         if not os.path.exists(img_path):
             continue
             
@@ -304,7 +304,7 @@ def create_window():
     # CARREGAMENTO DE SPRITES IDLE/PARADO
     i = 1
     while True:
-        img_path = os.path.join("images", f"idle{i}.png")
+        img_path = os.path.join("assets","images", f"idle{i}.png")
         if not os.path.exists(img_path):
             break
             
@@ -329,7 +329,7 @@ def create_window():
 
     # CARREGAMENTO DE SPRITES DE PUXAR (pull1.png, pull2.png)
     for i in range(1, 3):  # pull1.png e pull2.png
-        img_path = os.path.join("images", f"pull{i}.png")
+        img_path = os.path.join("assets","images", f"pull{i}.png")
         if not os.path.exists(img_path):
             continue
             
