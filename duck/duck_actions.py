@@ -1,11 +1,16 @@
+# duck_actions.py
+"""
+Ações que o pato pode executar na tela.
+Corrigido para usar o novo sistema de estados.
+"""
+
 import pyautogui
 import random
 import time
+import threading
 
 def move_mouse_randomly():
-    """
-    Move o cursor do mouse para uma posição aleatória na tela.
-    """
+    """Move o cursor do mouse para uma posição aleatória na tela."""
     width, height = pyautogui.size()  # Pega o tamanho da tela
     x = random.randint(0, width)
     y = random.randint(0, height)
@@ -90,8 +95,6 @@ def drag_mouse_with_beak(duck_direction_x):
     Args:
         duck_direction_x: 1 se pato olha direita, -1 se olha esquerda
     """
-    from . import window  # Import local para evitar circular
-    
     def pull_action():
         print("[DUCK ACTION] Puxando o mouse com o bico!")
         
@@ -111,13 +114,9 @@ def drag_mouse_with_beak(duck_direction_x):
             time.sleep(0.05)  # Total: 100ms por puxão
     
     # Executa em thread separada para não travar animação
-    import threading
     pull_thread = threading.Thread(target=pull_action, daemon=True)
     pull_thread.start()
 
 # Lista de ações disponíveis - REMOVIDA do uso automático
 # Agora essas ações só acontecem quando o pato está em cima do mouse
 mouse_actions = [annoy_mouse]  # Mantém só para referência, mas não usa mais
-
-# FUNÇÃO REMOVIDA - Não queremos mais ações aleatórias de mouse
-# def do_random_mouse_action():
