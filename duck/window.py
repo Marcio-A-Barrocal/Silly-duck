@@ -1,7 +1,6 @@
 # window.py
 """
-Interface gráfica simplificada do pato.
-Agora só cuida da janela e delegaed tudo para os outros módulos.
+Interface gráfica do pato.
 """
 
 import tkinter as tk
@@ -16,27 +15,28 @@ from . import duck_sprites
 def move_duck(root, label):
     """
     LOOP PRINCIPAL DE ANIMAÇÃO: Atualiza movimento, sprite e posição.
-    Chama a si mesma a cada 100ms para criar animação fluida.
     """
+    # REMOVIDO: A chamada para check_mouse_proximity() foi removida daqui.
+
     # Atualiza cooldowns
     duck_state.update_cooldown()
 
-    # DECIDE O MOVIMENTO baseado no estado
+    # A lógica de movimento permanece a mesma
     if duck_state.is_pulling_mouse:
-        # Durante o puxão, usa movimento especial
         duck_movement.handle_pulling_movement(root)
+    elif duck_state.is_fleeing:
+        duck_movement.flee_from_mouse_step(root)
     elif duck_state.is_following_mouse:
-        duck_movement.follow_mouse_step()         # Persegue o mouse
+        duck_movement.follow_mouse_step()
     elif not duck_state.is_idle:
-        duck_movement.random_walk_step(root)      # Caminha aleatoriamente
-    # Se is_idle=True, fica parado
+        duck_movement.random_walk_step(root)
 
     # ATUALIZA O SPRITE
     current_sprite = duck_sprites.get_current_sprite()
 
     # Atualiza a imagem e posição da janela
     label.config(image=current_sprite)
-    label.image = current_sprite  # Evita garbage collection
+    label.image = current_sprite
     root.geometry(f"128x128+{int(duck_state.pos_x)}+{int(duck_state.pos_y)}")
     
     # Agenda próxima atualização em 100ms
@@ -52,22 +52,18 @@ def create_window():
     """
     print("[WINDOW] Criando janela do pato...")
     
-    # CONFIGURAÇÃO DA JANELA
     root = tk.Tk()
     duck_state.set_root_reference(root)
     
-    root.overrideredirect(True)        # Remove barra de título
-    root.attributes("-topmost", True)   # Sempre por cima
+    root.overrideredirect(True)
+    root.attributes("-topmost", True)
     
-    # TRANSPARÊNCIA: Usa cor magenta como transparente
     transparent_color = "#ff00ff"
     root.configure(bg=transparent_color)
     root.wm_attributes("-transparentcolor", transparent_color)
 
-    # CARREGA TODOS OS SPRITES
     duck_sprites.load_all_sprites()
 
-    # CRIA O LABEL COM A IMAGEM - Inicia com sprite de caminhada
     if duck_sprites.sprites_right:
         initial_sprite = duck_sprites.sprites_right[0]
     else:
@@ -77,18 +73,27 @@ def create_window():
     label = tk.Label(root, image=initial_sprite, bg=transparent_color)
     label.pack()
 
+    # --- NOVA FUNÇÃO DE CALLBACK PARA O CLIQUE ---
+    def on_duck_click(event):
+        """
+        Esta função é chamada quando o label do pato é clicado.
+        """
+        # Só permite iniciar a fuga se o pato não estiver ocupado puxando o mouse.
+        if not duck_state.is_pulling_mouse:
+            duck_state.start_fleeing()
+
+    # --- NOVO: VINCULANDO O EVENTO DE CLIQUE AO LABEL ---
+    # "<Button-1>" se refere ao clique com o botão esquerdo do mouse.
+    label.bind("<Button-1>", on_duck_click)
+
     print("[WINDOW] Iniciando animação do pato...")
-    # INICIA A ANIMAÇÃO
     move_duck(root, label)
     
-    # INICIA O LOOP DA INTERFACE GRÁFICA
     root.mainloop()
 
 # =============================================================================
-# FUNÇÕES DE COMPATIBILIDADE (para manter funcionando com código existente)
+# FUNÇÕES DE COMPATIBILIDADE (Nenhuma alteração necessária aqui)
 # =============================================================================
-
-# Expor variáveis de estado para compatibilidade
 @property
 def is_idle():
     return duck_state.is_idle
@@ -101,7 +106,6 @@ def is_following_mouse():
 def is_pulling_mouse():
     return duck_state.is_pulling_mouse
 
-# Expor funções de estado para compatibilidade
 def start_follow_mouse():
     return duck_state.start_follow_mouse()
 
