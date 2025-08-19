@@ -30,6 +30,7 @@ idle_sprite_index = 0
 pull_sprite_index = 0
 pull_timer = 0
 pull_cooldown = 0
+bounce_sprite_index = 0 
 
 # =============================================================================
 # REFERÊNCIAS
@@ -81,6 +82,7 @@ def start_fleeing():
         is_fleeing = True
         is_following_mouse = False
         is_idle = False
+        bounce_sprite_index = 0 
         current_speed = flee_speed
         
         # Agenda o fim da fuga para um tempo aleatório entre 2 e 4 segundos
